@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uganda EFRIS Connect</title>
+<style>
+  /* ── Tukei Hope Initiative Color Scheme ── */
+  :root {
+    --thi-green: #2e7d32;
+    --thi-green-light: #43a047;
+    --thi-green-dark: #1b5e20;
+    --thi-gold: #f9a825;
+    --thi-gold-light: #fdd835;
+    --thi-red: #c62828;
+    --thi-red-light: #ef5350;
+    --thi-blue: #1565c0;
+    --thi-gray: #546e7a;
+    --thi-bg: #f1f8e9;
+    --thi-card: #ffffff;
+    --thi-border: #c8e6c9;
+    --thi-text: #1a2e1a;
+    --thi-text-light: #4a6741;
+    --thi-shadow: 0 2px 8px rgba(46,125,50,0.12);
+    --thi-radius: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--thi-bg);
+    color: var(--thi-text);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, var(--thi-green-dark) 0%, var(--thi-green) 60%, var(--thi-green-light) 100%);
+    color: white;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 3px solid var(--thi-gold);
+  }
+  .header .flag { font-size: 22px; }
+  .header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+  .header .subtitle { font-size: 11px; opacity: 0.85; }
+  .header .mode-badge {
+    margin-left: auto;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .mode-badge.sandbox { background: var(--thi-gold); color: #5d4037; }
+  .mode-badge.production { background: #ef5350; color: white; }
+
+  /* ── Main Content ── */
+  .content { padding: 14px 16px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--thi-card);
+    border: 1px solid var(--thi-border);
+    border-radius: var(--thi-radius);
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: var(--thi-shadow);
+  }
+  .card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--thi-green-dark);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--thi-border);
+    padding-bottom: 8px;
+  }
+  .card h3 .icon { font-size: 16px; }
+
+  /* ── Status Bar ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .status-bar.info { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+  .status-bar.success { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+  .status-bar.error { background: #ffebee; color: #b71c1c; border: 1px solid #ef9a9a; }
+  .status-bar.warning { background: #fff8e1; color: #e65100; border: 1px solid #ffcc02; }
+  .status-bar .spin { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Invoice Info Box ── */
+  .invoice-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .invoice-info .field { }
+  .invoice-info .label {
+    font-size: 10px;
+    color: var(--thi-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .invoice-info .value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--thi-text);
+  }
+  .invoice-info .field.full { grid-column: 1 / -1; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--thi-green);
+    color: white;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--thi-green-dark); }
+  .btn-secondary {
+    background: white;
+    color: var(--thi-green);
+    border: 2px solid var(--thi-green);
+  }
+  .btn-secondary:hover:not(:disabled) { background: var(--thi-bg); }
+  .btn-danger {
+    background: var(--thi-red);
+    color: white;
+  }
+  .btn-danger:hover:not(:disabled) { background: var(--thi-red-light); }
+  .btn-gold {
+    background: var(--thi-gold);
+    color: #4a3000;
+  }
+  .btn-gold:hover:not(:disabled) { background: var(--thi-gold-light); }
+  .btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+    width: auto;
+    margin-bottom: 0;
+  }
+
+  /* ── EFRIS Result Box ── */
+  .result-box {
+    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+    border: 2px solid var(--thi-green);
+    border-radius: var(--thi-radius);
+    padding: 14px;
+    margin-top: 12px;
+  }
+  .result-box h4 {
+    color: var(--thi-green-dark);
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .fdn-display {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--thi-green-dark);
+    background: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--thi-green);
+    margin: 8px 0;
+    word-break: break-all;
+    letter-spacing: 1px;
+  }
+  .qr-img {
+    max-width: 150px;
+    border: 2px solid var(--thi-green);
+    border-radius: 4px;
+    margin: 8px 0;
+  }
+
+  /* ── Form Fields ── */
+  .form-group { margin-bottom: 10px; }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--thi-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--thi-border);
+    border-radius: 5px;
+    font-size: 13px;
+    color: var(--thi-text);
+    background: white;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--thi-green);
+    box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+  }
+  .form-group .hint {
+    font-size: 10px;
+    color: var(--thi-gray);
+    margin-top: 3px;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid var(--thi-border);
+    margin-bottom: 14px;
+    gap: 2px;
+  }
+  .tab {
+    padding: 7px 14px;
+    border: none;
+    background: transparent;
+    color: var(--thi-text-light);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--thi-green);
+    color: white;
+    border-bottom: 2px solid var(--thi-green);
+    margin-bottom: -2px;
+  }
+  .tab:hover:not(.active) { background: var(--thi-bg); }
+
+  /* ── Onboarding ── */
+  .onboarding-step {
+    display: none;
+  }
+  .onboarding-step.active {
+    display: block;
+  }
+  .step-indicator {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    justify-content: center;
+  }
+  .step-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--thi-border);
+    transition: background 0.3s;
+  }
+  .step-dot.active { background: var(--thi-green); }
+  .step-dot.done { background: var(--thi-green-light); }
+
+  /* ── Progress Step ── */
+  .progress-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .progress-step .icon { flex-shrink: 0; width: 20px; text-align: center; }
+  .progress-step.pending { opacity: 0.5; }
+  .progress-step.done { color: var(--thi-green-dark); }
+  .progress-step.active { color: var(--thi-blue); font-weight: 600; }
+  .progress-step.error { color: var(--thi-red); }
+
+  /* ── Item List ── */
+  .line-items-preview {
+    font-size: 11px;
+    border: 1px solid var(--thi-border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .line-item-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 6px;
+    padding: 5px 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .line-item-row:last-child { border-bottom: none; }
+  .line-item-row.header {
+    background: var(--thi-bg);
+    font-weight: 600;
+    color: var(--thi-text-light);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.4px;
+  }
+
+  /* ── Alert Box ── */
+  .alert {
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .alert-info { background: #e3f2fd; border-left: 3px solid #1565c0; color: #0d47a1; }
+  .alert-warning { background: #fff8e1; border-left: 3px solid #f9a825; color: #5d4037; }
+  .alert-success { background: #e8f5e9; border-left: 3px solid #2e7d32; color: #1b5e20; }
+
+  /* ── Toggle Switch ── */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--thi-border);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-label { font-size: 12px; font-weight: 600; }
+  .toggle-desc { font-size: 10px; color: var(--thi-gray); }
+  .toggle {
+    position: relative;
+    width: 44px; height: 24px;
+    background: #ccc;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .toggle.on { background: var(--thi-green); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    left: 2px; top: 2px;
+    width: 20px; height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+  }
+  .toggle.on::after { transform: translateX(20px); }
+
+  /* ── Footer ── */
+  .footer {
+    background: var(--thi-green-dark);
+    color: rgba(255,255,255,0.85);
+    padding: 10px 16px;
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.7;
+  }
+  .footer a { color: var(--thi-gold); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+  .footer .reg { color: rgba(255,255,255,0.6); font-size: 9px; }
+
+  /* ── Divider ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--thi-border);
+    margin: 10px 0;
+  }
+
+  /* ── Utilities ── */
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+  .text-muted { color: var(--thi-gray); font-size: 11px; }
+  .text-green { color: var(--thi-green-dark); font-weight: 700; }
+  .text-red { color: var(--thi-red); }
+  .text-gold { color: #856404; font-weight: 700; }
+  .flex-row { display: flex; gap: 8px; align-items: center; }
+  .flex-row .btn { flex: 1; }
+  .hidden { display: none !important; }
+  .mt-8 { margin-top: 8px; }
+  .mb-8 { margin-bottom: 8px; }
+
+  /* ── Screen views ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── Setup guide steps ── */
+  .guide-step {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+  }
+  .guide-step .num {
+    width: 22px; height: 22px;
+    background: var(--thi-green);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .guide-step .body h4 { font-size: 12px; color: var(--thi-green-dark); margin-bottom: 2px; }
+  .guide-step .body p { font-size: 11px; color: var(--thi-gray); }
+
+  code {
+    background: #f5f5f5;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #c62828;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  HEADER                                                -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="header">
+  <span class="flag">🇺🇬</span>
+  <div>
+    <h1>Uganda EFRIS Connect</h1>
+    <div class="subtitle">URA Electronic Fiscal Receipting &amp; Invoicing</div>
+  </div>
+  <span class="mode-badge sandbox" id="modeBadge">SANDBOX</span>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  MAIN CONTENT                                          -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="content">
+
+  <!-- SCREEN: Loading -->
+  <div class="screen active" id="screenLoading">
+    <div class="status-bar info">
+      <span class="spin">⏳</span>
+      <span>Loading invoice data from Manager.io…</span>
+    </div>
+  </div>
+
+  <!-- SCREEN: Onboarding (first-time setup) -->
+  <div class="screen" id="screenOnboarding">
+    <div class="card">
+      <h3><span class="icon">👋</span> Welcome to Uganda EFRIS Connect</h3>
+      <p style="font-size:12px;color:var(--thi-gray);margin-bottom:12px;">
+        Let's set up your EFRIS credentials once. You won't need to enter these again.
+      </p>
+
+      <div class="step-indicator" id="stepDots"></div>
+
+      <!-- Step 1: Business Info -->
+      <div class="onboarding-step active" id="step1">
+        <div class="alert alert-info">
+          <strong>📋 Step 1 of 4 — Your Business Information</strong><br>
+          This is your basic business profile. Manager.io will remember this.
+        </div>
+        <div class="form-group">
+          <label>Business Legal Name *</label>
+          <input type="text" id="ob_legalName" placeholder="e.g. Two Servants Tours & Safaris Ltd" />
+          <div class="hint">Exactly as registered with URSB</div>
+        </div>
+        <div class="form-group">
+          <label>Trade / Business Name</label>
+          <input type="text" id="ob_tradeName" placeholder="e.g. Two Servants Tours" />
+          <div class="hint">Name used on receipts (if different from legal name)</div>
+        </div>
+        <div class="form-group">
+          <label>Business Address *</label>
+          <input type="text" id="ob_address" placeholder="e.g. Plot 14 Kimaka Road, Entebbe" />
+        </div>
+        <div class="form-group">
+          <label>Contact Phone</label>
+          <input type="text" id="ob_phone" placeholder="e.g. +256 757 837010" />
+        </div>
+        <div class="form-group">
+          <label>Contact Email</label>
+          <input type="email" id="ob_email" placeholder="e.g. accounts@yourbusiness.ug" />
+        </div>
+        <button class="btn btn-primary" onclick="onboardingNext(1)">Next →</button>
+      </div>
+
+      <!-- Step 2: EFRIS Credentials -->
+      <div class="onboarding-step" id="step2">
+        <div class="alert alert-warning">
+          <strong>🔐 Step 2 of 4 — Your EFRIS Credentials</strong><br>
+          From URA. Go to <strong>efristest.ura.go.ug</strong> to get these. Keep them safe.
+        </div>
+        <div class="form-group">
+          <label>TIN — Taxpayer Identification Number *</label>
+          <input type="text" id="ob_tin" placeholder="e.g. 1015292010" />
+          <div class="hint">Your 10-digit URA tax number</div>
+        </div>
+        <div class="form-group">
+          <label>Device Number (DSN) *</label>
+          <input type="text" id="ob_deviceNo" placeholder="e.g. 1015292010_01" />
+          <div class="hint">From URA EFRIS portal → Device Management</div>
+        </div>
+        <div class="form-group">
+          <label>EFRIS Password *</label>
+          <input type="password" id="ob_efrisPassword" placeholder="Your EFRIS portal password" />
+          <div class="hint">⚠ This is your URA EFRIS login password, NOT your URA account password</div>
+        </div>
+        <div class="form-group">
+          <label>BRN — Business Registration Number</label>
+          <input type="text" id="ob_brn" placeholder="e.g. 80039756 (optional)" />
+          <div class="hint">From URSB certificate (optional for most businesses)</div>
+        </div>
+        <div class="flex-row">
+          <button class="btn btn-secondary" onclick="onboardingBack(2)">← Back</button>
+          <button class="btn btn-primary" onclick="onboardingNext(2)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: VAT & Mode -->
+      <div class="onboarding-step" id="step3">
+        <div class="alert alert-info">
+          <strong>⚙️ Step 3 of 4 — Tax &amp; Mode Settings</strong><br>
+          Tell us how your business handles tax.
+        </div>
+        <div class="card" style="margin-bottom:10px;padding:10px;">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">VAT Registered Business</div>
+              <div class="toggle-desc">You charge 18% VAT on your sales</div>
+            </div>
+            <div class="toggle" id="vatToggle" onclick="toggleSetting('vatToggle','vatRegistered')"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Use Sandbox (Test Mode) ✅</div>
+              <div class="toggle-desc">Recommended until you are ready to go live</div>
+            </div>
+            <div class="toggle on" id="sandboxToggle" onclick="toggleSetting('sandboxToggle','sandboxMode')"></div>
+          </div>
+        </div>
+        <div class="alert alert-warning">
+          <strong>⚠ Stay in Sandbox mode</strong> until you have successfully tested at least 3 invoices. Only switch to Production when ready to submit real tax documents.
+        </div>
+        <div class="flex-row">
+          <button class="btn btn-secondary" onclick="onboardingBack(3)">← Back</button>
+          <button class="btn btn-primary" onclick="onboardingNext(3)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Manager.io Connection & Test -->
+      <div class="onboarding-step" id="step4">
+        <div class="alert alert-info">
+          <strong>🔗 Step 4 of 4 — Manager.io &amp; Relay Server</strong>
+        </div>
+        <div class="form-group">
+          <label>Manager.io API Endpoint *</label>
+          <input type="text" id="ob_managerEndpoint" placeholder="e.g. http://localhost:8080/api4" />
+          <div class="hint">Desktop: <code>http://localhost:8080/api4</code> | Docker: <code>http://localhost:8090/api4</code></div>
+        </div>
+        <div class="form-group">
+          <label>Manager.io Access Token *</label>
+          <input type="text" id="ob_accessToken" placeholder="Paste your access token here" />
+          <div class="hint">Manager → Settings → API Keys → Create Key</div>
+        </div>
+        <div class="form-group">
+          <label>Relay Server URL</label>
+          <input type="text" id="ob_relayUrl" value="http://localhost:5000" placeholder="http://localhost:5000" />
+          <div class="hint">Keep as default. The relay server must be running on your computer.</div>
+        </div>
+
+        <button class="btn btn-gold" onclick="testRelayConnection()" id="btnTestRelay">
+          🔌 Test Relay Server Connection
+        </button>
+        <div id="relayTestResult" class="hidden"></div>
+
+        <div class="flex-row mt-8">
+          <button class="btn btn-secondary" onclick="onboardingBack(4)">← Back</button>
+          <button class="btn btn-primary" onclick="finishOnboarding()">✅ Save &amp; Start Using</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: Main Extension UI -->
+  <div class="screen" id="screenMain">
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('tabSubmit', this)">📤 Submit</button>
+      <button class="tab" onclick="showTab('tabStatus', this)">📋 Status</button>
+      <button class="tab" onclick="showTab('tabGuide', this)">❓ Guide</button>
+      <button class="tab" onclick="showTab('tabSettings', this)">⚙️ Settings</button>
+    </div>
+
+    <!-- TAB: Submit Invoice -->
+    <div id="tabSubmit" class="tab-content">
+
+      <!-- Invoice Summary Card -->
+      <div class="card" id="invoiceSummaryCard">
+        <h3><span class="icon">🧾</span> Invoice Details</h3>
+        <div class="invoice-info" id="invoiceInfoGrid">
+          <div class="field">
+            <div class="label">Invoice No.</div>
+            <div class="value" id="invNo">—</div>
+          </div>
+          <div class="field">
+            <div class="label">Date</div>
+            <div class="value" id="invDate">—</div>
+          </div>
+          <div class="field full">
+            <div class="label">Customer</div>
+            <div class="value" id="invCustomer">—</div>
+          </div>
+          <div class="field">
+            <div class="label">Currency</div>
+            <div class="value" id="invCurrency">—</div>
+          </div>
+          <div class="field">
+            <div class="label">Amount</div>
+            <div class="value text-green" id="invTotal">—</div>
+          </div>
+        </div>
+
+        <!-- Line items preview -->
+        <div id="lineItemsPreview"></div>
+
+        <!-- Exchange rate (for non-UGX) -->
+        <div id="exchangeRateRow" class="hidden" style="margin-top:8px;">
+          <div class="alert alert-warning">
+            <strong>💱 Foreign Currency Detected</strong><br>
+            URA requires the UGX equivalent. Enter today's exchange rate:
+          </div>
+          <div class="form-group">
+            <label>Exchange Rate (1 <span id="foreignCurrLabel">USD</span> = ? UGX)</label>
+            <input type="number" id="exchangeRate" placeholder="e.g. 3650" min="1" />
+            <div class="hint">Check Bank of Uganda or your bank for today's rate</div>
+          </div>
+        </div>
+
+        <!-- B2B Customer TIN -->
+        <div class="form-group mt-8">
+          <label>Customer TIN (optional — for B2B tax invoices)</label>
+          <input type="text" id="customerTIN" placeholder="Leave blank for B2C receipts / tourists" />
+          <div class="hint">If your customer is a registered Ugandan business, enter their TIN here</div>
+        </div>
+
+        <!-- EFRIS submission status -->
+        <div id="submissionStatus" class="hidden"></div>
+
+        <!-- Already submitted indicator -->
+        <div id="alreadySubmittedBox" class="hidden">
+          <div class="alert alert-success">
+            ✅ <strong>Already submitted to EFRIS</strong><br>
+            FDN: <span id="existingFDN" class="text-green"></span>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div id="actionButtons">
+          <button class="btn btn-primary" id="btnSubmit" onclick="submitToEFRIS()">
+            📤 Submit to URA EFRIS
+          </button>
+          <button class="btn btn-secondary" id="btnCreditNote" onclick="submitCreditNote()" style="display:none;">
+            ↩️ Submit as Credit Note
+          </button>
+        </div>
+      </div>
+
+      <!-- EFRIS Result Card (shown after success) -->
+      <div class="result-box hidden" id="efrisResultBox">
+        <h4>✅ Successfully Submitted to URA EFRIS</h4>
+        <div class="label" style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--thi-text-light);">Fiscal Document Number (FDN)</div>
+        <div class="fdn-display" id="resultFDN"></div>
+        <div class="flex-row">
+          <div>
+            <div class="label" style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--thi-text-light);">Antifake Code</div>
+            <div style="font-size:12px;font-weight:600;" id="resultAntifake">—</div>
+          </div>
+        </div>
+        <div id="qrCodeDisplay" class="hidden mt-8">
+          <div class="label" style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--thi-text-light);">Verification QR Code</div>
+          <img id="qrCodeImg" class="qr-img" alt="EFRIS QR Code" />
+          <div style="font-size:10px;color:var(--thi-gray);">Scan to verify on URA EFRIS portal</div>
+        </div>
+        <hr class="divider">
+        <div id="managerSaveStatus" class="status-bar info hidden">
+          <span class="spin">⏳</span> Saving to Manager.io…
+        </div>
+        <div id="managerSaveResult"></div>
+      </div>
+
+      <!-- Error Card -->
+      <div class="card hidden" id="errorCard">
+        <h3>❌ Submission Failed</h3>
+        <div class="status-bar error" id="errorMessage"></div>
+        <div id="errorHint" class="alert alert-info hidden"></div>
+        <button class="btn btn-secondary btn-sm mt-8" onclick="retrySubmission()">🔄 Try Again</button>
+      </div>
+    </div>
+
+    <!-- TAB: Status / History -->
+    <div id="tabStatus" class="tab-content hidden">
+      <div class="card">
+        <h3><span class="icon">📋</span> EFRIS Submission Status</h3>
+        <div id="statusContent">
+          <div class="text-muted text-center" style="padding:20px;">
+            Loading status…
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">🔍</span> Verify Invoice on URA Portal</h3>
+        <div class="form-group">
+          <label>Enter FDN to check on URA</label>
+          <input type="text" id="fdnToQuery" placeholder="Paste FDN here" />
+        </div>
+        <button class="btn btn-secondary" onclick="queryEFRIS()">🔍 Check Status on URA</button>
+        <div id="queryResult" class="mt-8"></div>
+      </div>
+    </div>
+
+    <!-- TAB: User Guide -->
+    <div id="tabGuide" class="tab-content hidden">
+      <div class="card">
+        <h3><span class="icon">📖</span> How to Use EFRIS Connect</h3>
+
+        <div class="guide-step">
+          <div class="num">1</div>
+          <div class="body">
+            <h4>Open any Sales Invoice or Receipt in Manager.io</h4>
+            <p>The extension automatically reads the invoice details. You will see them above.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="num">2</div>
+          <div class="body">
+            <h4>Check the invoice details are correct</h4>
+            <p>Review the customer name, amount, and line items shown in the Submit tab.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="num">3</div>
+          <div class="body">
+            <h4>Click "Submit to URA EFRIS"</h4>
+            <p>The extension will connect to URA and submit the invoice. This takes about 10–15 seconds.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="num">4</div>
+          <div class="body">
+            <h4>Your FDN will appear</h4>
+            <p>URA returns a Fiscal Document Number (FDN). This is automatically saved to your invoice in Manager.io in the EFRIS FDN custom field.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="num">5</div>
+          <div class="body">
+            <h4>Print your receipt/invoice</h4>
+            <p>The FDN and QR code will appear on your printed document for customer verification.</p>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <h3 class="mt-8" style="border-bottom:none;padding-bottom:0;"><span class="icon">⚠️</span> Common Problems</h3>
+
+        <div class="alert alert-warning mt-8">
+          <strong>Relay server not running</strong><br>
+          Open Command Prompt, go to your extension folder, and run: <code>node server.js</code>
+        </div>
+        <div class="alert alert-warning">
+          <strong>"Authentication failed"</strong><br>
+          Check your TIN, Device Number, and EFRIS password in Settings tab.
+        </div>
+        <div class="alert alert-warning">
+          <strong>"Invoice already submitted"</strong><br>
+          EFRIS rejects duplicate invoice numbers. This invoice was already submitted successfully.
+        </div>
+        <div class="alert alert-info">
+          <strong>First time? Start in Sandbox mode</strong><br>
+          Test with real invoice data in the EFRIS test environment before switching to Production.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Settings -->
+    <div id="tabSettings" class="tab-content hidden">
+      <div class="card">
+        <h3><span class="icon">🏢</span> Business Information</h3>
+        <div class="form-group">
+          <label>Business Legal Name</label>
+          <input type="text" id="s_legalName" />
+        </div>
+        <div class="form-group">
+          <label>Trade Name</label>
+          <input type="text" id="s_tradeName" />
+        </div>
+        <div class="form-group">
+          <label>Business Address</label>
+          <input type="text" id="s_address" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">🔐</span> EFRIS Credentials</h3>
+        <div class="form-group">
+          <label>TIN Number</label>
+          <input type="text" id="s_tin" />
+        </div>
+        <div class="form-group">
+          <label>Device Number (DSN)</label>
+          <input type="text" id="s_deviceNo" />
+        </div>
+        <div class="form-group">
+          <label>EFRIS Password</label>
+          <input type="password" id="s_efrisPassword" />
+        </div>
+        <div class="form-group">
+          <label>BRN (optional)</label>
+          <input type="text" id="s_brn" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">🔗</span> System Settings</h3>
+        <div class="form-group">
+          <label>Manager.io API Endpoint</label>
+          <input type="text" id="s_managerEndpoint" />
+        </div>
+        <div class="form-group">
+          <label>Access Token</label>
+          <input type="text" id="s_accessToken" />
+        </div>
+        <div class="form-group">
+          <label>Relay Server URL</label>
+          <input type="text" id="s_relayUrl" />
+        </div>
+
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">VAT Registered</div>
+            <div class="toggle-desc">Business charges 18% VAT</div>
+          </div>
+          <div class="toggle" id="s_vatToggle" onclick="toggleSettingSettings('s_vatToggle','vatRegistered')"></div>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Sandbox Mode</div>
+            <div class="toggle-desc">Use test environment (recommended for setup)</div>
+          </div>
+          <div class="toggle on" id="s_sandboxToggle" onclick="toggleSettingSettings('s_sandboxToggle','sandboxMode')"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+      <button class="btn btn-secondary" onclick="testRelayFromSettings()">🔌 Test Connection</button>
+      <div id="settingsSaveResult" class="mt-8"></div>
+
+      <button class="btn btn-danger" onclick="resetSettings()" style="margin-top:8px;">
+        🗑 Reset All Settings (Start Over)
+      </button>
+    </div>
+
+  </div><!-- /screenMain -->
+
+  <!-- SCREEN: No Invoice Selected -->
+  <div class="screen" id="screenNoInvoice">
+    <div class="card">
+      <h3>📄 No Invoice Open</h3>
+      <p class="text-muted">
+        This extension works when you have a Sales Invoice or Sales Receipt open in Manager.io.<br><br>
+        Please open an invoice and the extension will load its details automatically.
+      </p>
+      <div class="alert alert-info mt-8">
+        <strong>How to use:</strong><br>
+        1. Click <strong>Sales Invoices</strong> in Manager.io<br>
+        2. Open any invoice<br>
+        3. This extension will show below the invoice
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: Error -->
+  <div class="screen" id="screenError">
+    <div class="status-bar error" id="screenErrorMsg"></div>
+    <button class="btn btn-secondary mt-8" onclick="retryLoad()">🔄 Retry</button>
+  </div>
+
+</div><!-- /content -->
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  FOOTER                                                -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="footer">
+  <div>🇺🇬 Uganda EFRIS Connect — Free &amp; Open Source</div>
+  <div>
+    Supported by <a href="https://tukeihopeinitiative.org/" target="_blank">The Tukei Hope Initiative ↗</a>
+    — A Community Based Organisation, Entebbe, Uganda
+  </div>
+  <div class="reg">Registration No. EMC/CBO/025 | Your Hope, Our Mission</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  JAVASCRIPT                                            -->
+<!-- ══════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── STATE ────────────────────────────────────────────────
+let managerOrigin = null;
+let managerApiEndpoint = null;
+let managerAccessToken = null;
+let currentDocumentKey = null;
+let currentDocumentType = null;
+let currentInvoice = null;
+let settings = {};
+let onboardingData = {};
+
+// Simple settings toggles state
+const toggleStates = {
+  vatRegistered: false,
+  sandboxMode: true
+};
+
+// ── STORAGE HELPERS ──────────────────────────────────────
+// We use a simple in-memory + URL-param storage approach
+// since localStorage is not available in Manager iframes
+// Settings are stored in the extension's own backend config
+
+const CONFIG_KEY = 'efrisConfig';
+
+function loadSettings() {
+  try {
+    const raw = sessionStorage.getItem(CONFIG_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return null;
+}
+
+function saveSettingsToStorage(data) {
+  try {
+    sessionStorage.setItem(CONFIG_KEY, JSON.stringify(data));
+  } catch (e) {}
+}
+
+// ── ONBOARDING LOGIC ─────────────────────────────────────
+let currentStep = 1;
+const TOTAL_STEPS = 4;
+
+function renderStepDots() {
+  const container = document.getElementById('stepDots');
+  container.innerHTML = '';
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'step-dot' + (i === currentStep ? ' active' : (i < currentStep ? ' done' : ''));
+    container.appendChild(dot);
+  }
+}
+
+function showStep(n) {
+  document.querySelectorAll('.onboarding-step').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('step' + n);
+  if (el) el.classList.add('active');
+  currentStep = n;
+  renderStepDots();
+}
+
+function onboardingNext(from) {
+  // Validate
+  if (from === 1) {
+    const legalName = v('ob_legalName');
+    const address = v('ob_address');
+    if (!legalName || !address) {
+      alert('⚠ Please fill in Legal Name and Address');
+      return;
+    }
+    onboardingData.legalName = legalName;
+    onboardingData.tradeName = v('ob_tradeName') || legalName;
+    onboardingData.address = address;
+    onboardingData.phone = v('ob_phone');
+    onboardingData.email = v('ob_email');
+  } else if (from === 2) {
+    const tin = v('ob_tin');
+    const deviceNo = v('ob_deviceNo');
+    const password = v('ob_efrisPassword');
+    if (!tin || !deviceNo || !password) {
+      alert('⚠ TIN, Device Number, and EFRIS Password are required');
+      return;
+    }
+    onboardingData.tin = tin;
+    onboardingData.deviceNo = deviceNo;
+    onboardingData.efrisPassword = password;
+    onboardingData.brn = v('ob_brn');
+  } else if (from === 3) {
+    onboardingData.vatRegistered = toggleStates.vatRegistered;
+    onboardingData.sandboxMode = toggleStates.sandboxMode;
+  }
+  showStep(from + 1);
+}
+
+function onboardingBack(from) {
+  showStep(from - 1);
+}
+
+function finishOnboarding() {
+  const endpoint = v('ob_managerEndpoint');
+  const token = v('ob_accessToken');
+  const relay = v('ob_relayUrl');
+
+  if (!endpoint || !token) {
+    alert('⚠ Manager.io Endpoint and Access Token are required');
+    return;
+  }
+
+  onboardingData.managerEndpoint = endpoint;
+  onboardingData.accessToken = token;
+  onboardingData.relayUrl = relay || 'http://localhost:5000';
+
+  // Save
+  saveSettingsToStorage(onboardingData);
+  settings = onboardingData;
+
+  applySettings();
+  showScreen('screenMain');
+
+  // If we have an invoice loaded, show it
+  if (currentInvoice) {
+    renderInvoice(currentInvoice);
+  } else {
+    showScreen('screenNoInvoice');
+  }
+}
+
+// ── SETTINGS MANAGEMENT ──────────────────────────────────
+function applySettings() {
+  // Update mode badge
+  const badge = document.getElementById('modeBadge');
+  if (settings.sandboxMode) {
+    badge.textContent = 'SANDBOX';
+    badge.className = 'mode-badge sandbox';
+  } else {
+    badge.textContent = 'PRODUCTION';
+    badge.className = 'mode-badge production';
+  }
+
+  // Populate settings tab
+  sv('s_legalName', settings.legalName);
+  sv('s_tradeName', settings.tradeName);
+  sv('s_address', settings.address);
+  sv('s_tin', settings.tin);
+  sv('s_deviceNo', settings.deviceNo);
+  sv('s_efrisPassword', settings.efrisPassword);
+  sv('s_brn', settings.brn);
+  sv('s_managerEndpoint', settings.managerEndpoint);
+  sv('s_accessToken', settings.accessToken);
+  sv('s_relayUrl', settings.relayUrl || 'http://localhost:5000');
+
+  toggleStates.vatRegistered = settings.vatRegistered || false;
+  toggleStates.sandboxMode = settings.sandboxMode !== false;
+  updateToggle('s_vatToggle', toggleStates.vatRegistered);
+  updateToggle('s_sandboxToggle', toggleStates.sandboxMode);
+}
+
+function saveSettings() {
+  settings.legalName = v('s_legalName');
+  settings.tradeName = v('s_tradeName');
+  settings.address = v('s_address');
+  settings.tin = v('s_tin');
+  settings.deviceNo = v('s_deviceNo');
+  settings.efrisPassword = v('s_efrisPassword');
+  settings.brn = v('s_brn');
+  settings.managerEndpoint = v('s_managerEndpoint');
+  settings.accessToken = v('s_accessToken');
+  settings.relayUrl = v('s_relayUrl') || 'http://localhost:5000';
+  settings.vatRegistered = toggleStates.vatRegistered;
+  settings.sandboxMode = toggleStates.sandboxMode;
+
+  saveSettingsToStorage(settings);
+  applySettings();
+  show('settingsSaveResult', '<div class="status-bar success">✅ Settings saved!</div>');
+  setTimeout(() => hide('settingsSaveResult'), 3000);
+}
+
+function resetSettings() {
+  if (!confirm('⚠ This will clear all your EFRIS settings. Are you sure?')) return;
+  sessionStorage.removeItem(CONFIG_KEY);
+  location.reload();
+}
+
+function toggleSetting(toggleId, settingKey) {
+  toggleStates[settingKey] = !toggleStates[settingKey];
+  updateToggle(toggleId, toggleStates[settingKey]);
+}
+
+function toggleSettingSettings(toggleId, settingKey) {
+  toggleStates[settingKey] = !toggleStates[settingKey];
+  updateToggle(toggleId, toggleStates[settingKey]);
+}
+
+function updateToggle(id, state) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'toggle' + (state ? ' on' : '');
+}
+
+// ── RELAY CONNECTION TEST ────────────────────────────────
+async function testRelayConnection() {
+  const relay = v('ob_relayUrl') || 'http://localhost:5000';
+  const btn = document.getElementById('btnTestRelay');
+  btn.disabled = true;
+  btn.textContent = '⏳ Testing…';
+
+  try {
+    const res = await fetch(relay + '/api/test', { method: 'GET' });
+    const data = await res.json();
+    if (data.status === 'online') {
+      show('relayTestResult', '<div class="status-bar success">✅ Relay server is running!</div>');
+    } else {
+      throw new Error('Unexpected response');
+    }
+  } catch (e) {
+    show('relayTestResult', '<div class="status-bar error">❌ Cannot reach relay server at ' + relay + '<br><small>Make sure you have started: <code>node server.js</code></small></div>');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔌 Test Relay Server Connection';
+}
+
+async function testRelayFromSettings() {
+  const relay = v('s_relayUrl') || 'http://localhost:5000';
+  try {
+    const res = await fetch(relay + '/api/test');
+    const data = await res.json();
+    show('settingsSaveResult', '<div class="status-bar success">✅ Relay server connected: ' + data.name + '</div>');
+  } catch (e) {
+    show('settingsSaveResult', '<div class="status-bar error">❌ Cannot reach relay server at: ' + relay + '</div>');
+  }
+}
+
+// ── MANAGER.IO INTEGRATION ───────────────────────────────
+// Listen for Manager.io context (passed via postMessage)
+window.addEventListener('message', (event) => {
+  if (!event.data) return;
+
+  const data = event.data;
+
+  // Manager sends its origin and API context
+  if (data.apiEndpoint && data.apiAccessToken) {
+    managerOrigin = event.origin;
+    managerApiEndpoint = data.apiEndpoint;
+    managerAccessToken = data.apiAccessToken;
+
+    // Also update settings if not set
+    if (!settings.managerEndpoint) {
+      settings.managerEndpoint = managerApiEndpoint;
+    }
+    if (!settings.accessToken) {
+      settings.accessToken = managerAccessToken;
+    }
+  }
+
+  // Manager sends the current document key
+  if (data.documentKey) {
+    currentDocumentKey = data.documentKey;
+    currentDocumentType = data.documentType || 'sales-invoice';
+    loadInvoiceFromManager(currentDocumentKey);
+  }
+});
+
+// Also try to read from URL params (for testing outside Manager)
+function readURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('apiEndpoint')) {
+    managerApiEndpoint = params.get('apiEndpoint');
+  }
+  if (params.get('apiAccessToken')) {
+    managerAccessToken = params.get('apiAccessToken');
+  }
+  if (params.get('documentKey')) {
+    currentDocumentKey = params.get('documentKey');
+    loadInvoiceFromManager(currentDocumentKey);
+  }
+}
+
+async function loadInvoiceFromManager(documentKey) {
+  if (!documentKey) {
+    showScreen('screenNoInvoice');
+    return;
+  }
+
+  const endpoint = settings.managerEndpoint || managerApiEndpoint;
+  const token = settings.accessToken || managerAccessToken;
+
+  if (!endpoint || !token) {
+    // Maybe settings not loaded yet
+    if (!loadSettings()) {
+      showScreen('screenNoInvoice');
+      return;
+    }
+  }
+
+  try {
+    showScreen('screenLoading');
+    const res = await fetch(`${endpoint}/${documentKey}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const invoice = await res.json();
+    currentInvoice = invoice;
+    renderInvoice(invoice);
+    showScreen('screenMain');
+
+  } catch (e) {
+    // If can't load from Manager, show UI anyway for manual testing
+    showScreen('screenNoInvoice');
+  }
+}
+
+function renderInvoice(inv) {
+  // Populate invoice fields
+  setText('invNo', inv.Reference || inv.Code || inv.InvoiceNo || '—');
+  setText('invDate', formatDate(inv.IssueDate || inv.Date));
+  setText('invCustomer', inv.Customer?.Name || inv.BuyerName || inv.CustomerName || '—');
+  setText('invCurrency', inv.Currency || 'UGX');
+
+  const total = inv.Total || inv.GrossAmount || 0;
+  setText('invTotal', formatCurrency(total, inv.Currency));
+
+  // Check if already submitted
+  const fdn = inv.CustomFields?.['EFRIS FDN'] || inv['EFRIS FDN'];
+  if (fdn) {
+    document.getElementById('alreadySubmittedBox').classList.remove('hidden');
+    setText('existingFDN', fdn);
+    document.getElementById('btnSubmit').textContent = '🔄 Re-submit to EFRIS';
+  }
+
+  // Check non-UGX currency
+  const currency = inv.Currency || 'UGX';
+  if (currency !== 'UGX') {
+    document.getElementById('exchangeRateRow').classList.remove('hidden');
+    setText('foreignCurrLabel', currency);
+  }
+
+  // Render line items
+  renderLineItems(inv.Lines || inv.Items || []);
+
+  // Show credit note button only on credit notes
+  if (currentDocumentType && currentDocumentType.includes('credit')) {
+    document.getElementById('btnCreditNote').style.display = 'block';
+    document.getElementById('btnSubmit').style.display = 'none';
+  }
+
+  // Load status tab
+  loadStatusInfo(inv);
+}
+
+function renderLineItems(lines) {
+  if (!lines || lines.length === 0) return;
+  const container = document.getElementById('lineItemsPreview');
+  let html = '<div class="line-items-preview">';
+  html += '<div class="line-item-row header"><span>Item</span><span>Qty</span><span>Price</span><span>Total</span></div>';
+  lines.slice(0, 5).forEach(line => {
+    html += `<div class="line-item-row">
+      <span>${truncate(line.ItemName || line.Description || line.Account || 'Item', 22)}</span>
+      <span>${line.Qty || 1}</span>
+      <span>${formatNum(line.UnitPrice || 0)}</span>
+      <span>${formatNum(line.LineTotal || 0)}</span>
+    </div>`;
+  });
+  if (lines.length > 5) {
+    html += `<div class="line-item-row"><span style="color:var(--thi-gray)">…and ${lines.length - 5} more items</span></div>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function loadStatusInfo(inv) {
+  const status = inv.CustomFields?.['EFRIS Status'] || '—';
+  const fdn = inv.CustomFields?.['EFRIS FDN'] || '—';
+  const date = inv.CustomFields?.['EFRIS Submission Date'] || '—';
+  const err = inv.CustomFields?.['EFRIS Error Message'] || '';
+
+  let html = `
+    <div class="invoice-info">
+      <div class="field"><div class="label">EFRIS Status</div><div class="value">${status}</div></div>
+      <div class="field"><div class="label">Submitted</div><div class="value">${date}</div></div>
+      <div class="field full"><div class="label">FDN</div><div class="value">${fdn}</div></div>
+    </div>`;
+  if (err) {
+    html += `<div class="alert alert-warning"><strong>Last Error:</strong><br>${err}</div>`;
+  }
+  document.getElementById('statusContent').innerHTML = html;
+}
+
+// ── EFRIS SUBMISSION ─────────────────────────────────────
+async function submitToEFRIS() {
+  if (!settings.tin) {
+    alert('⚠ Please complete setup in Settings first');
+    showTab('tabSettings', document.querySelectorAll('.tab')[3]);
+    return;
+  }
+
+  if (!currentInvoice && !currentDocumentKey) {
+    alert('⚠ No invoice loaded. Please open an invoice in Manager.io first.');
+    return;
+  }
+
+  const relay = settings.relayUrl || 'http://localhost:5000';
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⏳</span> Submitting to URA…';
+
+  document.getElementById('efrisResultBox').classList.add('hidden');
+  document.getElementById('errorCard').classList.add('hidden');
+
+  // Show progress
+  const progressHTML = `
+    <div id="progressSteps">
+      <div class="progress-step active" id="ps1">⏳ Connecting to URA EFRIS…</div>
+      <div class="progress-step pending" id="ps2">⏳ Authenticating your account…</div>
+      <div class="progress-step pending" id="ps3">⏳ Encrypting invoice data…</div>
+      <div class="progress-step pending" id="ps4">⏳ Submitting invoice…</div>
+      <div class="progress-step pending" id="ps5">⏳ Saving FDN to Manager.io…</div>
+    </div>`;
+  show('submissionStatus', progressHTML);
+  document.getElementById('submissionStatus').classList.remove('hidden');
+
+  // Build invoice data
+  const invoice = buildInvoicePayload();
+  const config = buildConfig();
+
+  try {
+    // Update progress
+    updateProgress(1, 'done', '✅ Connected to relay server');
+    updateProgress(2, 'active', '⏳ Authenticating with URA…');
+
+    // Call relay server to submit invoice
+    const submitRes = await fetch(`${relay}/api/efris/submit-invoice`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ invoice, config })
+    });
+
+    const submitData = await submitRes.json();
+
+    updateProgress(2, 'done', '✅ Authentication successful');
+    updateProgress(3, 'done', '✅ Invoice encrypted');
+    updateProgress(4, submitData.success ? 'done' : 'error',
+      submitData.success ? '✅ Invoice accepted by URA' : '❌ URA rejected invoice');
+
+    if (!submitData.success) {
+      throw new Error(submitData.error || 'EFRIS submission failed');
+    }
+
+    // Success! Show result
+    const { fdn, qrCode, antifakeCode } = submitData;
+    showEFRISResult(fdn, qrCode, antifakeCode);
+
+    // Save to Manager
+    updateProgress(5, 'active', '⏳ Saving to Manager.io…');
+    await saveToManager(fdn, qrCode, antifakeCode);
+    updateProgress(5, 'done', '✅ Saved to Manager.io');
+
+  } catch (err) {
+    console.error('Submission error:', err);
+    showError(err.message, getErrorHint(err.message));
+
+    btn.disabled = false;
+    btn.innerHTML = '📤 Submit to URA EFRIS';
+    return;
+  }
+
+  // Reset button
+  btn.disabled = false;
+  btn.innerHTML = '🔄 Submit Again';
+}
+
+function buildInvoicePayload() {
+  const inv = currentInvoice || {};
+  const exRate = parseFloat(v('exchangeRate') || '1') || 1;
+
+  return {
+    Reference: inv.Reference || inv.Code || inv.InvoiceNo || 'INV-001',
+    InvoiceNumber: inv.Reference || inv.Code || 'INV-001',
+    IssueDate: inv.IssueDate || inv.Date || new Date().toISOString().slice(0, 10),
+    CustomerName: inv.Customer?.Name || inv.BuyerName || inv.CustomerName || '',
+    CustomerTIN: v('customerTIN') || inv.CustomFields?.['Customer TIN'] || '',
+    CustomerAddress: inv.Customer?.Address || '',
+    CustomerPhone: inv.Customer?.Phone || '',
+    CustomerEmail: inv.Customer?.Email || '',
+    Currency: inv.Currency || 'UGX',
+    ExchangeRate: exRate.toString(),
+    Total: inv.Total || inv.GrossAmount || 0,
+    AmountExcludingTax: inv.AmountExcludingTax || inv.NetAmount || 0,
+    TaxAmount: inv.TaxAmount || 0,
+    Notes: inv.Notes || '',
+    Lines: (inv.Lines || inv.Items || []).map(line => ({
+      ItemName: line.ItemName || line.Description || line.Account || 'Service',
+      Description: line.Description || '',
+      Qty: line.Qty || line.Quantity || 1,
+      UnitPrice: (line.UnitPrice || 0) * exRate,
+      LineTotal: (line.LineTotal || line.Amount || 0) * exRate,
+      TaxAmount: (line.TaxAmount || 0) * exRate,
+      Unit: line.Unit || 'Each',
+      EFRISCategoryId: line.EFRISCategoryId || '101',
+    }))
+  };
+}
+
+function buildConfig() {
+  return {
+    tin: settings.tin,
+    deviceNo: settings.deviceNo,
+    efrisPassword: settings.efrisPassword,
+    mode: settings.sandboxMode ? 'sandbox' : 'production',
+    businessName: settings.legalName,
+    tradeName: settings.tradeName,
+    businessAddress: settings.address,
+    brn: settings.brn || '',
+    email: settings.email || '',
+    mobilePhone: settings.phone || '',
+    vatRegistered: settings.vatRegistered || false,
+    operatorName: settings.legalName,
+  };
+}
+
+async function saveToManager(fdn, qrCode, antifakeCode) {
+  const relay = settings.relayUrl || 'http://localhost:5000';
+  const endpoint = settings.managerEndpoint || managerApiEndpoint;
+  const token = settings.accessToken || managerAccessToken;
+
+  show('managerSaveStatus', '');
+  document.getElementById('managerSaveStatus').classList.remove('hidden');
+
+  if (!endpoint || !token || !currentDocumentKey) {
+    document.getElementById('managerSaveStatus').classList.add('hidden');
+    show('managerSaveResult',
+      '<div class="alert alert-warning">⚠ Could not auto-save to Manager (missing endpoint/token).<br>FDN: <strong>' + fdn + '</strong> — please note this down.</div>');
+    return;
+  }
+
+  try {
+    const saveRes = await fetch(`${relay}/api/efris/save-to-manager`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        managerEndpoint: endpoint,
+        accessToken: token,
+        documentKey: currentDocumentKey,
+        documentType: currentDocumentType,
+        efrisData: { fdn, qrCode, antifakeCode }
+      })
+    });
+
+    const saveData = await saveRes.json();
+    document.getElementById('managerSaveStatus').classList.add('hidden');
+
+    if (saveData.success) {
+      show('managerSaveResult',
+        '<div class="status-bar success">✅ Invoice updated in Manager.io with EFRIS data</div>');
+    } else {
+      show('managerSaveResult',
+        `<div class="alert alert-warning">
+          ⚠ FDN received but could not save to Manager automatically.<br>
+          <strong>FDN: ${fdn}</strong><br>
+          Please manually enter this in the EFRIS FDN field on the invoice.<br>
+          <small>${saveData.error || ''}</small>
+        </div>`);
+    }
+  } catch (e) {
+    document.getElementById('managerSaveStatus').classList.add('hidden');
+    show('managerSaveResult',
+      `<div class="alert alert-warning">
+        ⚠ Network error saving to Manager.<br>
+        <strong>FDN: ${fdn}</strong> — Please note this down.
+      </div>`);
+  }
+}
+
+function showEFRISResult(fdn, qrCode, antifakeCode) {
+  document.getElementById('efrisResultBox').classList.remove('hidden');
+  setText('resultFDN', fdn || '—');
+  setText('resultAntifake', antifakeCode || '—');
+
+  if (qrCode) {
+    document.getElementById('qrCodeDisplay').classList.remove('hidden');
+    const qrImg = document.getElementById('qrCodeImg');
+    if (qrCode.startsWith('data:') || qrCode.startsWith('http')) {
+      qrImg.src = qrCode;
+    } else {
+      // base64 QR code
+      qrImg.src = 'data:image/png;base64,' + qrCode;
+    }
+  }
+}
+
+function updateProgress(step, state, text) {
+  const el = document.getElementById('ps' + step);
+  if (!el) return;
+  el.className = 'progress-step ' + state;
+  el.textContent = text;
+}
+
+function showError(message, hint) {
+  document.getElementById('errorCard').classList.remove('hidden');
+  show('errorMessage', message);
+  if (hint) {
+    document.getElementById('errorHint').classList.remove('hidden');
+    show('errorHint', hint);
+  }
+}
+
+function retrySubmission() {
+  document.getElementById('errorCard').classList.add('hidden');
+  submitToEFRIS();
+}
+
+function getErrorHint(msg) {
+  const m = (msg || '').toLowerCase();
+  if (m.includes('authentication') || m.includes('login') || m.includes('password')) {
+    return '💡 Check your TIN, Device Number, and EFRIS Password in Settings.';
+  }
+  if (m.includes('relay') || m.includes('fetch') || m.includes('network') || m.includes('connect')) {
+    return '💡 The relay server is not running. Open Command Prompt and run: <code>node server.js</code>';
+  }
+  if (m.includes('duplicate') || m.includes('already')) {
+    return '💡 This invoice number was already submitted to EFRIS. Each invoice number can only be submitted once.';
+  }
+  if (m.includes('commodity') || m.includes('goods')) {
+    return '💡 One or more products are not registered in EFRIS. Contact URA or use the Goods Registry feature.';
+  }
+  return null;
+}
+
+// ── CREDIT NOTE ──────────────────────────────────────────
+async function submitCreditNote() {
+  alert('Credit note submission uses the same flow as invoices. Ensure the original invoice FDN is in the EFRIS FDN field of the original invoice.');
+  submitToEFRIS();
+}
+
+// ── STATUS QUERY ─────────────────────────────────────────
+async function queryEFRIS() {
+  const fdn = v('fdnToQuery');
+  if (!fdn) { alert('⚠ Please enter an FDN'); return; }
+
+  const relay = settings.relayUrl || 'http://localhost:5000';
+  try {
+    const res = await fetch(`${relay}/api/efris/query-invoice`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tin: settings.tin,
+        deviceNo: settings.deviceNo,
+        password: settings.efrisPassword,
+        mode: settings.sandboxMode ? 'sandbox' : 'production',
+        invoiceNo: fdn
+      })
+    });
+    const data = await res.json();
+    const verifyUrl = `https://efristest.ura.go.ug/efrissite/receipts/verify?fdn=${encodeURIComponent(fdn)}`;
+    show('queryResult',
+      `<div class="alert alert-info">
+        Query sent. To verify on URA portal:<br>
+        <a href="${verifyUrl}" target="_blank" style="color:var(--thi-blue);">🔗 Verify on URA EFRIS Portal</a>
+      </div>`);
+  } catch (e) {
+    show('queryResult', '<div class="status-bar error">❌ Could not query: ' + e.message + '</div>');
+  }
+}
+
+// ── UI HELPERS ───────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function showTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(tabId).classList.remove('hidden');
+  if (btn) btn.classList.add('active');
+}
+
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+function sv(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val || '';
+}
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+function show(id, html) {
+  const el = document.getElementById(id);
+  if (el) { el.innerHTML = html; el.classList.remove('hidden'); }
+}
+function hide(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('hidden');
+}
+function truncate(str, n) {
+  return str && str.length > n ? str.slice(0, n) + '…' : str;
+}
+function formatNum(n) {
+  return parseFloat(n || 0).toLocaleString('en-UG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function formatCurrency(amount, currency) {
+  const curr = currency || 'UGX';
+  return curr + ' ' + formatNum(amount);
+}
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    return new Date(dateStr).toLocaleDateString('en-UG', { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch (e) { return dateStr; }
+}
+
+function retryLoad() {
+  location.reload();
+}
+
+// ── INITIALIZATION ───────────────────────────────────────
+function init() {
+  // Render onboarding dots
+  renderStepDots();
+
+  // Try to load saved settings
+  const saved = loadSettings();
+
+  if (saved && saved.tin && saved.managerEndpoint) {
+    settings = saved;
+    applySettings();
+
+    // Check if we have a document to load
+    readURLParams();
+
+    if (currentDocumentKey) {
+      loadInvoiceFromManager(currentDocumentKey);
+    } else {
+      // Wait for postMessage from Manager
+      showScreen('screenNoInvoice');
+
+      // If after 2 seconds no message, show no invoice screen
+      setTimeout(() => {
+        if (!currentInvoice) showScreen('screenNoInvoice');
+      }, 2000);
+    }
+  } else {
+    // First time — show onboarding
+    showScreen('screenOnboarding');
+  }
+}
+
+// Start
+init();
+</script>
+</body>
+</html>
